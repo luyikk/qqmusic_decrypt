@@ -2,9 +2,54 @@ use anyhow::{Context, Result};
 use frida::{Frida, Message};
 use serde_json::json;
 use std::env::{current_dir, home_dir};
+use std::io::{self, Write};
+use std::path::PathBuf;
 use std::sync::LazyLock;
 
 static FRIDA: LazyLock<Frida> = LazyLock::new(|| unsafe { Frida::obtain() });
+
+fn resolve_qq_music_dir() -> Result<PathBuf> {
+    let default_dir = home_dir()
+        .context("无法获取home主目录")?
+        .join("Music")
+        .join("VipSongsDownload");
+
+    print!("解析路径是否使用QQ音乐默认下载路径？(Y/n) ");
+    io::stdout().flush()?;
+
+    let mut answer = String::new();
+    io::stdin().read_line(&mut answer)?;
+
+    if answer.trim().is_empty() || answer.trim().eq_ignore_ascii_case("y") {
+        return Ok(default_dir);
+    }
+
+    loop {
+        println!("请粘贴要解析的目录路径（支持拖拽）：");
+        print!("> ");
+        io::stdout().flush()?;
+
+        let mut custom_path = String::new();
+        io::stdin().read_line(&mut custom_path)?;
+        let custom_path = custom_path.trim();
+        let custom_path = custom_path
+            .strip_prefix('"')
+            .and_then(|s| s.strip_suffix('"'))
+            .unwrap_or(custom_path);
+        let custom_path = PathBuf::from(custom_path);
+
+        if !custom_path.exists() {
+            println!("[!] 错误：路径不存在，请重新输入。\n");
+            continue;
+        }
+        
+        if !custom_path.is_dir() {
+            println!("[!] 错误：输入的路径不是目录，请重新输入。\n");
+            continue;
+        }
+        return Ok(custom_path);
+    }
+}
 
 fn main() -> Result<()> {
     let device_manager = frida::DeviceManager::obtain(&FRIDA);
@@ -24,10 +69,7 @@ fn main() -> Result<()> {
     script.handle_message(Handler)?;
     script.load()?;
 
-    let qq_music_dir = home_dir()
-        .context("无法获取home主目录")?
-        .join("Music")
-        .join("VipSongsDownload");
+    let qq_music_dir = resolve_qq_music_dir()?;
 
     println!("[*] QQ音乐目录: {}", qq_music_dir.display());
 
