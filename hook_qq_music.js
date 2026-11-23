@@ -1,27 +1,24 @@
-﻿const TARGET_DLL = "QQMusicCommon.dll";
+const TARGET_DLL = "QQMusicCommon.dll";
 
-var EncAndDesMediaFileConstructorAddr = Module.findExportByName(
-  TARGET_DLL,
+var qqModule = Process.getModuleByName(TARGET_DLL);
+
+var EncAndDesMediaFileConstructorAddr = qqModule.findExportByName(
   "??0EncAndDesMediaFile@@QAE@XZ"
 );
 
-var EncAndDesMediaFileDestructorAddr = Module.findExportByName(
-  TARGET_DLL,
+var EncAndDesMediaFileDestructorAddr = qqModule.findExportByName(
   "??1EncAndDesMediaFile@@QAE@XZ"
 );
 
-var EncAndDesMediaFileOpenAddr = Module.findExportByName(
-  TARGET_DLL,
+var EncAndDesMediaFileOpenAddr = qqModule.findExportByName(
   "?Open@EncAndDesMediaFile@@QAE_NPB_W_N1@Z"
 );
 
-var EncAndDesMediaFileGetSizeAddr = Module.findExportByName(
-  TARGET_DLL,
+var EncAndDesMediaFileGetSizeAddr = qqModule.findExportByName(
   "?GetSize@EncAndDesMediaFile@@QAEKXZ"
 );
 
-var EncAndDesMediaFileReadAddr = Module.findExportByName(
-  TARGET_DLL,
+var EncAndDesMediaFileReadAddr = qqModule.findExportByName(
   "?Read@EncAndDesMediaFile@@QAEKPAEK_J@Z"
 );
 
